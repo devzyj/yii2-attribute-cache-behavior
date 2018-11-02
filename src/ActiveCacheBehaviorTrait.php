@@ -24,7 +24,7 @@ trait ActiveCacheBehaviorTrait
      * @param \yii\caching\Dependency $dependency 设置缓存的依赖项。
      * @return \yii\db\ActiveRecord|null 匹配条件的 ActiveRecord 实例，如果没有匹配，则为 `null`。
      * @see ActiveCacheBehavior::ensureActiveKeyAttribute()
-     * @see findOrSetOne()
+     * @see ActiveCacheBehavior::getOrSetModelCacheByAttribute()
      */
     public static function findOrSetOneByAttribute($attribute, $duration = null, $dependency = null)
     {
