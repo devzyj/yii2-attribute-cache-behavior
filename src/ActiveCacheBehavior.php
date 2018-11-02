@@ -506,8 +506,11 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     /**
      * 确保缓存键属性值的格式是有效的。
      * 
-     * 设置 [[$keyAttributes]] 为单个属性时，可以直接传递属性值。
-     * 设置 [[$keyAttributes]] 为多个属性时，可以使用索引数组，按属性顺序传递缓存键。
+     * `$attribute` 不为数组时，设置的 [[$keyAttributes]] 属性都为该值。
+     * `$attribute` 为数组时：
+     *     - 数组中的元素数量必需与设置的 [[$keyAttributes]] 数量相等。
+     *     - 数组为索引数组时，可以按属性顺序传递缓存键。
+     *     - 数组为关联数组时，必须存在与设置的 [[$keyAttributes]] 一样的属性。
      * 
      * @param mixed $attribute 属性值。
      * @return array
@@ -528,19 +531,22 @@ class ActiveCacheBehavior extends ModelCacheBehavior
                 return array_combine($keyAttributes, $attribute);
             }
             
-            // 验证关联数组的有效性。
-            if (array_diff($keyAttributes, array_keys($attribute))) {
-                // 关联数组中的属性名称与设置的缓存键属性不同。
-                throw new InvalidArgumentException('The key of `$attribute` and `$keyAttributes` are not equal.');
+            // 处理关联数组，确保数组元素的顺序与设置的缓存键属性顺序相同。
+            $keys = [];
+            foreach ($keyAttributes as $keyAttribute) {
+                if (!array_key_exists($keyAttribute, $attribute)) {
+                    // 关联数组中的属性名称与设置的缓存键属性不同。
+                    throw new InvalidArgumentException('The key of `$attribute` and `$keyAttributes` are not equal.');
+                }
+            
+                $keys[$keyAttribute] = $attribute[$keyAttribute];
             }
             
-            return $attribute;
-        } elseif (count($keyAttributes) == 1) {
-            // 设置了单个属性，并且直接传递属性值。
-            return array_fill_keys($keyAttributes, $attribute);
+            return $keys;
         }
         
-        throw new InvalidArgumentException('The `$attribute` is invalid.');
+        // 设置的 [[$keyAttributes]] 属性都为该值。
+        return array_fill_keys($keyAttributes, $attribute);
     }
     
     /**

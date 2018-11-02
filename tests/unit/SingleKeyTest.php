@@ -8,6 +8,7 @@ namespace devzyj\behaviors\tests\unit;
 
 use Yii;
 use yii\db\Migration;
+use yii\base\InvalidArgumentException;
 use devzyj\behaviors\tests\models\TestSingleKey;
 
 /**
@@ -54,8 +55,17 @@ class SingleKeyTest extends TestCase
             return 'get or set cache again';
         }));
         
-        // test associative array
+        // test array
+        $this->assertEquals('get or set cache', TestSingleKey::instance()->getModelCacheByAttribute([$attribute]));
         $this->assertEquals('get or set cache', TestSingleKey::instance()->getModelCacheByAttribute(['id' => $attribute]));
+        
+        // test exception
+        $this->tester->expectException(new InvalidArgumentException('The number of `$attribute` and `$keyAttributes` is not equal.'), function () {
+            TestSingleKey::instance()->getModelCacheByAttribute([1, 2]);
+        });
+        $this->tester->expectException(new InvalidArgumentException('The key of `$attribute` and `$keyAttributes` are not equal.'), function () {
+            TestSingleKey::instance()->getModelCacheByAttribute(['id2' => 1]);
+        });
     }
     
     /**
