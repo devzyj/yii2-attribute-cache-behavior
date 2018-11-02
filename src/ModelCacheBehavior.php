@@ -9,6 +9,7 @@ namespace devzyj\behaviors;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 
 /**
  * ModelCacheBehavior 提供了一些会对缓存键进行处理的缓存方法。
@@ -104,7 +105,7 @@ class ModelCacheBehavior extends \yii\base\Behavior
         } elseif (is_string($this->cache)) {
             $this->cache = Yii::$app->get($this->cache);
         } elseif (!$this->cache instanceof \yii\caching\CacheInterface) {
-            throw new InvalidConfigException(__CLASS__ . '::$cache is invalid.');
+            throw new InvalidConfigException(get_class($this) . '::$cache is invalid.');
         }
         
         parent::init();
@@ -134,11 +135,8 @@ class ModelCacheBehavior extends \yii\base\Behavior
      */
     public function getModelCache($key)
     {
-        // 加工缓存键。
         $cacheKey = $this->processModelCacheKey($key);
-        
-        // 获取缓存内容。
-        Yii::debug($cacheKey, __METHOD__);
+        Yii::debug('Gets cache value for key ' . Json::encode($cacheKey), __METHOD__);
         return $this->cache->get($cacheKey);
     }
 
@@ -153,11 +151,8 @@ class ModelCacheBehavior extends \yii\base\Behavior
      */
     public function existsModelCache($key)
     {
-        // 加工缓存键。
         $cacheKey = $this->processModelCacheKey($key);
-        
-        // 获取缓存内容。
-        Yii::debug($cacheKey, __METHOD__);
+        Yii::debug('Checks cache exists for key ' . Json::encode($cacheKey), __METHOD__);
         return $this->cache->exists($cacheKey);
     }
     
@@ -173,17 +168,12 @@ class ModelCacheBehavior extends \yii\base\Behavior
      */
     public function setModelCache($key, $value, $duration = null, $dependency = null)
     {
-        // 持续时间。
         if ($duration === null) {
             $duration = $this->defaultDuration;
         }
 
-        // 加工缓存键。
         $cacheKey = $this->processModelCacheKey($key);
-
-        // 设置缓存内容。
-        Yii::debug($cacheKey, __METHOD__);
-        Yii::debug($value, __METHOD__);
+        Yii::debug('Sets cache value for key ' . Json::encode($cacheKey), __METHOD__);
         return $this->cache->set($cacheKey, $value, $duration, $dependency);
     }
     
@@ -201,12 +191,8 @@ class ModelCacheBehavior extends \yii\base\Behavior
      */
     public function addModelCache($key, $value, $duration = 0, $dependency = null)
     {
-        // 加工缓存键。
         $cacheKey = $this->processModelCacheKey($key);
-
-        // 设置缓存内容。
-        Yii::debug($cacheKey, __METHOD__);
-        Yii::debug($value, __METHOD__);
+        Yii::debug('Adds cache value for key ' . Json::encode($cacheKey), __METHOD__);
         return $this->cache->add($cacheKey, $value, $duration, $dependency);
     }
     
@@ -219,11 +205,8 @@ class ModelCacheBehavior extends \yii\base\Behavior
      */
     public function deleteModelCache($key)
     {
-        // 加工缓存键。
         $cacheKey = $this->processModelCacheKey($key);
-
-        // 删除缓存内容。
-        Yii::debug($cacheKey, __METHOD__);
+        Yii::debug('Deletes cache value for key ' . Json::encode($cacheKey), __METHOD__);
         return $this->cache->delete($cacheKey);
     }
     

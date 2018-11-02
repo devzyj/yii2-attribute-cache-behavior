@@ -21,7 +21,7 @@ class ModelCacheBehaviorTest extends TestCase
      */
     public function testMethods()
     {
-        $key = __METHOD__;
+        $key = __FUNCTION__;
         TestModel::instance()->deleteModelCache($key);
         
         // start test

@@ -23,7 +23,7 @@ class ActiveCacheBehaviorTest extends TestCase
      */
     public function testModelCacheBehaviorMethods()
     {
-        $key = __METHOD__;
+        $key = __FUNCTION__;
         TestActive::instance()->deleteModelCache($key);
         
         // start test

@@ -23,7 +23,7 @@ class TestModel extends \yii\base\Model
             [
                 'class' => 'devzyj\behaviors\ModelCacheBehavior',
                 'defaultDuration' => 600,
-                'baseModelCacheKey' => [static::className()],
+                'baseModelCacheKey' => ['devzyj-behaviors-tests-TestModel'],
             ],
         ];
     }

@@ -8,7 +8,6 @@ namespace devzyj\behaviors\tests\unit;
 
 use Yii;
 use yii\db\Migration;
-use yii\base\InvalidArgumentException;
 use devzyj\behaviors\tests\models\TestCompositeKey;
 
 /**
@@ -58,17 +57,9 @@ class CompositeKeyTest extends TestCase
         // test associative array
         $this->assertEquals('get or set cache', TestCompositeKey::instance()->getModelCacheByAttribute(['id1' => 1, 'id2' => 2]));
         $this->assertEquals('get or set cache', TestCompositeKey::instance()->getModelCacheByAttribute(['id2' => 2, 'id1' => 1]));
-        
-        // test exception
-        $this->tester->expectException(new InvalidArgumentException('The number of `$attribute` and `$keyAttributes` is not equal.'), function () {
-            TestCompositeKey::instance()->getModelCacheByAttribute([1]);
-        });
-        $this->tester->expectException(new InvalidArgumentException('The number of `$attribute` and `$keyAttributes` is not equal.'), function () {
-            TestCompositeKey::instance()->getModelCacheByAttribute([1, 2, 3]);
-        });
-        $this->tester->expectException(new InvalidArgumentException('The key of `$attribute` and `$keyAttributes` are not equal.'), function () {
-            TestCompositeKey::instance()->getModelCacheByAttribute(['id1' => 1, 'id3' => 3]);
-        });
+        $this->assertFalse(TestCompositeKey::instance()->getModelCacheByAttribute([1]));
+        $this->assertFalse(TestCompositeKey::instance()->getModelCacheByAttribute([1, 2, 3]));
+        $this->assertFalse(TestCompositeKey::instance()->getModelCacheByAttribute(['id1' => 1, 'id3' => 3]));
     }
     
     /**

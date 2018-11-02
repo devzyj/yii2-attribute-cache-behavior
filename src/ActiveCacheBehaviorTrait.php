@@ -19,7 +19,7 @@ trait ActiveCacheBehaviorTrait
     /**
      * 通过属性值，从缓存或者数据表中查找并返回单个活动记录模型实例。
      *
-     * @param mixed $attribute 属性值。参考 [[ensureActiveKeyAttribute()]]。
+     * @param mixed $attribute 属性值。参考 [[ensureActiveKeyAttribute()]]，如果属性值不正确，则会跳过缓存的操作，直接返回 `$callable` 执行的结果。
      * @param integer $duration 设置缓存的持续时间（秒）
      * @param \yii\caching\Dependency $dependency 设置缓存的依赖项。
      * @return \yii\db\ActiveRecord|null 匹配条件的 ActiveRecord 实例，如果没有匹配，则为 `null`。
@@ -31,9 +31,13 @@ trait ActiveCacheBehaviorTrait
         $data = static::instance()->getOrSetModelCacheByAttribute($attribute, function ($behavior) use ($attribute) {
             /* @var $behavior \devzyj\behaviors\ActiveCacheBehavior */
             $condition = $behavior->ensureActiveKeyAttribute($attribute);
+            if ($condition === false) {
+                $condition = $attribute;
+            } else {
+                Yii::debug("Cache value does not exist, querying the data from the database.", __METHOD__);
+            }
             
             /* @var $model \yii\db\ActiveRecord */
-            Yii::debug("Cache does not exist, querying the data from the database.", __METHOD__);
             $model = static::findOne($condition);
             return $model ? $model->getActiveCacheValue() : false;
         }, $duration, $dependency);

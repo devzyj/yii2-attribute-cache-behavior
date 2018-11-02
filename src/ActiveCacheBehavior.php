@@ -8,7 +8,6 @@ namespace devzyj\behaviors;
 
 use Yii;
 use yii\base\InvalidConfigException;
-use yii\base\InvalidArgumentException;
 use yii\db\BaseActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -40,22 +39,34 @@ use yii\helpers\ArrayHelper;
  * }
  * 
  * 
- * // Using Object Instance
- * $user = User::findOne(1);
+ * // Using trait methods
+ * // Returns a single active record model instance.
+ * // Sets cache value if there is no cache available for the `$primaryKey`.
+ * $user = User::findOrSetOneByAttribute($primaryKey);
  * 
- * // get cache
+ * // No changed, cache value exists.
+ * $user->save();
+ * 
+ * // Changed, cache value not exists.
+ * $user->name = 1;
+ * $user->save();
+ * 
+ * // Deleted, cache value not exists.
+ * $user->delete();
+ * 
+ * // Gets cache value for model instance.
  * $user->getActiveCache();
  * 
- * // exists cache
+ * // Checks cache value exists for model instance.
  * $user->existsActiveCache();
  * 
- * // set cache
+ * // Sets cache value for model instance.
  * $user->setActiveCache();
  * 
- * // add cache
+ * // Adds cache value for model instance.
  * $user->addActiveCache();
  * 
- * // delete cache
+ * // Deletes cache value for model instance.
  * $user->deleteActiveCache();
  * 
  * 
@@ -214,7 +225,7 @@ class ActiveCacheBehavior extends ModelCacheBehavior
         } elseif (is_string($this->_keyAttributes)) {
             $this->_keyAttributes = [$this->_keyAttributes];
         } elseif (!is_array($this->_keyAttributes)) {
-            throw new InvalidConfigException(__CLASS__ . '::$keyAttributes invalid.');
+            throw new InvalidConfigException(get_class($this) . '::$keyAttributes invalid.');
         }
         
         return $this->_keyAttributes;
@@ -241,7 +252,7 @@ class ActiveCacheBehavior extends ModelCacheBehavior
         if ($this->_valueAttributes === null) {
             $this->_valueAttributes = $this->owner->attributes();
         } elseif (!is_array($this->_valueAttributes)) {
-            throw new InvalidConfigException(__CLASS__ . '::$valueAttributes invalid.');
+            throw new InvalidConfigException(get_class($this) . '::$valueAttributes invalid.');
         }
     
         return $this->_valueAttributes;
@@ -409,7 +420,7 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     public function afterInsert($event)
     {
         // 删除可能已存在与新增数据相关的缓存。
-        Yii::debug("Delete cache after insert.", __METHOD__);
+        Yii::debug("Deletes cache value after insert.", __METHOD__);
         $this->deleteActiveCache();
     }
 
@@ -429,7 +440,7 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     public function afterDelete()
     {
         // 删除缓存。
-        Yii::debug("Delete cache after delete.", __METHOD__);
+        Yii::debug("Deletes cache value after delete.", __METHOD__);
         $this->deleteModelCache($this->_oldCacheKey);
     }
     
@@ -451,20 +462,19 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     {
         // 修改过的属性列表。
         $changedAttributes = $event->changedAttributes;
-        if ($this->validateChangedKeyAttributes($changedAttributes)) {
-            // 缓存键被修改。
-            // 删除修改前的旧缓存。
-            Yii::debug("Delete old cache after update.", __METHOD__);
-            $this->deleteModelCache($this->_oldCacheKey);
-            
-            // 删除修改后的缓存。
-            Yii::debug("Delete new cache after update.", __METHOD__);
-            $this->deleteActiveCache();
-        } elseif ($this->validateChangedValueAttributes($changedAttributes)) {
-            // 缓存内容被修改。
-            Yii::debug("Delete cache after update.", __METHOD__);
-            $this->deleteActiveCache();
+        if (empty($changedAttributes)) {
+            return;
         }
+        
+        if ($this->validateChangedKeyAttributes($changedAttributes)) {
+            // 缓存键被修改时，删除修改前的旧缓存。
+            Yii::debug("Deletes old cache value after update.", __METHOD__);
+            $this->deleteModelCache($this->_oldCacheKey);
+        }
+        
+        // 数据修改后，删除已存在的缓存。
+        Yii::debug("Deletes cache value after update.", __METHOD__);
+        $this->deleteActiveCache();
     }
     
     /**
@@ -486,35 +496,16 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     }
 
     /**
-     * 验证缓存值是否更改。
-     *
-     * @param array $changedAttributes 已更改的数据。
-     * @return boolean 是否更改过。如果返回 `true`，则会删除缓存，反之则不会删除缓存。
-     */
-    protected function validateChangedValueAttributes($changedAttributes)
-    {
-        $valueAttributes = $this->getValueAttributes();
-        foreach ($changedAttributes as $attribute => $value) {
-            if (in_array($attribute, $valueAttributes)) {
-                return true;
-            }
-        }
-    
-        return false;
-    }
-    
-    /**
      * 确保缓存键属性值的格式是有效的。
      * 
-     * `$attribute` 不为数组时，设置的 [[$keyAttributes]] 属性都为该值。
-     * `$attribute` 为数组时：
+     * 属性值 `$attribute` 不为数组时，返回一个使用 `$attribute` 为填充值，[[$keyAttributes]] 为键的列值数组。
+     * 属性值 `$attribute` 为数组时：
      *     - 数组中的元素数量必需与设置的 [[$keyAttributes]] 数量相等。
      *     - 数组为索引数组时，可以按属性顺序传递缓存键。
      *     - 数组为关联数组时，必须存在与设置的 [[$keyAttributes]] 一样的属性。
      * 
-     * @param mixed $attribute 属性值。
-     * @return array
-     * @throws \yii\base\InvalidArgumentException
+     * @param mixed $attribute 属性值。可以是单一的属性值，或索引数组，或列值数组。
+     * @return array|false 返回一个以 [[$keyAttributes]] 为键的列值数组。如果 `$attribute` 不正确，则返回 `false`。
      */
     public function ensureActiveKeyAttribute($attribute)
     {
@@ -522,10 +513,12 @@ class ActiveCacheBehavior extends ModelCacheBehavior
         if (is_array($attribute)) {
             if (empty($attribute)) {
                 // 不能为空数组。
-                throw new InvalidArgumentException('The `$attribute` cannot be an empty array.');
+                Yii::debug('The `$attribute` cannot be an empty array.');
+                return false;
             } elseif (count($attribute) != count($keyAttributes)) {
                 // 数组中的元素数量必需与设置的缓存键属性数量相等。
-                throw new InvalidArgumentException('The number of `$attribute` and `$keyAttributes` is not equal.');
+                Yii::debug('The number of `$attribute` and `$keyAttributes` is not equal.');
+                return false;
             } elseif (ArrayHelper::isIndexed($attribute)) {
                 // 使用索引数组，按属性顺序传递。
                 return array_combine($keyAttributes, $attribute);
@@ -536,16 +529,17 @@ class ActiveCacheBehavior extends ModelCacheBehavior
             foreach ($keyAttributes as $keyAttribute) {
                 if (!array_key_exists($keyAttribute, $attribute)) {
                     // 关联数组中的属性名称与设置的缓存键属性不同。
-                    throw new InvalidArgumentException('The key of `$attribute` and `$keyAttributes` are not equal.');
+                    Yii::debug('The key of `$attribute` and `$keyAttributes` are not equal.');
+                    return false;
                 }
-            
+                
                 $keys[$keyAttribute] = $attribute[$keyAttribute];
             }
             
             return $keys;
         }
         
-        // 设置的 [[$keyAttributes]] 属性都为该值。
+        // 返回一个使用 `$attribute` 为填充值，[[$keyAttributes]] 为键的列值数组。
         return array_fill_keys($keyAttributes, $attribute);
     }
     
@@ -560,6 +554,10 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     public function getModelCacheByAttribute($attribute)
     {
         $key = $this->ensureActiveKeyAttribute($attribute);
+        if ($key === false) {
+            return false;
+        }
+        
         return $this->getModelCache($key);
     }
     
@@ -574,6 +572,10 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     public function existsModelCacheByAttribute($attribute)
     {
         $key = $this->ensureActiveKeyAttribute($attribute);
+        if ($key === false) {
+            return false;
+        }
+        
         return $this->existsModelCache($key);
     }
 
@@ -591,6 +593,10 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     public function setModelCacheByAttribute($attribute, $value, $duration = null, $dependency = null)
     {
         $key = $this->ensureActiveKeyAttribute($attribute);
+        if ($key === false) {
+            return false;
+        }
+        
         return $this->setModelCache($key, $value, $duration, $dependency);
     }
 
@@ -608,6 +614,10 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     public function addModelCacheByAttribute($attribute, $value, $duration = null, $dependency = null)
     {
         $key = $this->ensureActiveKeyAttribute($attribute);
+        if ($key === false) {
+            return false;
+        }
+        
         return $this->addModelCache($key, $value, $duration, $dependency);
     }
     
@@ -622,13 +632,17 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     public function deleteModelCacheByAttribute($attribute)
     {
         $key = $this->ensureActiveKeyAttribute($attribute);
+        if ($key === false) {
+            return false;
+        }
+        
         return $this->deleteModelCache($key);
     }
     
     /**
      * 通过属性值，获取或者设置缓存。
      * 
-     * @param mixed $attribute 属性值。参考 [[ensureActiveKeyAttribute()]]。
+     * @param mixed $attribute 属性值。参考 [[ensureActiveKeyAttribute()]]，如果属性值不正确，则会跳过缓存的操作，直接返回 `$callable` 执行的结果。
      * @param callable|\Closure $callable 回调方法。
      * @param integer $duration 缓存的持续时间（秒）。
      * @param \yii\caching\Dependency $dependency 缓存的依赖项。
@@ -639,6 +653,10 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     public function getOrSetModelCacheByAttribute($attribute, $callable, $duration = null, $dependency = null)
     {
         $key = $this->ensureActiveKeyAttribute($attribute);
+        if ($key === false) {
+            return call_user_func($callable, $this);
+        }
+        
         return $this->getOrSetModelCache($key, $callable, $duration, $dependency);
     }
 }

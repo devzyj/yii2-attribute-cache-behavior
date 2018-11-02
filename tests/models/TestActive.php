@@ -34,7 +34,7 @@ class TestActive extends \yii\db\ActiveRecord
             [
                 'class' => 'devzyj\behaviors\ActiveCacheBehavior',
                 'defaultDuration' => 600,
-                'baseModelCacheKey' => [static::className()],
+                'baseModelCacheKey' => ['devzyj-behaviors-tests-TestActive'],
             ],
         ];
     }

@@ -48,22 +48,34 @@ class User extends \yii\db\ActiveRecord
 }
 
 
-// Using Object Instance
-$user = User::findOne(1);
+// Using trait methods
+// Returns a single active record model instance.
+// Sets cache value if there is no cache available for the `$primaryKey`.
+$user = User::findOrSetOneByAttribute($primaryKey);
 
-// get cache
+// No changed, cache value exists.
+$user->save();
+
+// Changed, cache value not exists.
+$user->name = 1;
+$user->save();
+
+// Deleted, cache value not exists.
+$user->delete();
+
+// Gets cache value for model instance.
 $user->getActiveCache();
 
-// exists cache
+// Checks cache value exists for model instance.
 $user->existsActiveCache();
 
-// set cache
+// Sets cache value for model instance.
 $user->setActiveCache();
 
-// add cache
+// Adds cache value for model instance.
 $user->addActiveCache();
 
-// delete cache
+// Deletes cache value for model instance.
 $user->deleteActiveCache();
 
 
