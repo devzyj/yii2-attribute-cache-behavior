@@ -80,95 +80,103 @@ $user->deleteActiveCache();
 
 
 // Using single key attribute
-$key = 1; // `ActiveCacheBehavior::$keyAttributes` values
+// ActiveCacheBehavior::$keyAttributes = ['id']
+$id = 1;
 
 // get cache
-User::instance()->getModelCacheByAttribute($key);
+User::instance()->getModelCacheByAttribute($id);
 // OR
-User::instance()->getModelCache(['keyAttribute' => $key]);
+User::instance()->getModelCache(['id' => $id]);
 
 // exists cache
-User::instance()->existsModelCacheByAttribute($key);
+User::instance()->existsModelCacheByAttribute($id);
 // OR
-User::instance()->existsModelCache(['keyAttribute' => $key]);
+User::instance()->existsModelCache(['id' => $id]);
 
 // set cache
-User::instance()->setModelCacheByAttribute($key, $value, $duration, $dependency);
+User::instance()->setModelCacheByAttribute($id, $value, $duration, $dependency);
 // OR
-User::instance()->setModelCache(['keyAttribute' => $key], $value, $duration, $dependency);
+User::instance()->setModelCache(['id' => $id], $value, $duration, $dependency);
 
 // add cache
-User::instance()->addModelCacheByAttribute($key, $value, $duration, $dependency);
+User::instance()->addModelCacheByAttribute($id, $value, $duration, $dependency);
 // OR
-User::instance()->addModelCache(['keyAttribute' => $key], $value, $duration, $dependency);
+User::instance()->addModelCache(['id' => $id], $value, $duration, $dependency);
 
 // delete cache
-User::instance()->deleteModelCacheByAttribute($key);
+User::instance()->deleteModelCacheByAttribute($id);
 // OR
-User::instance()->deleteModelCache(['keyAttribute' => $key]);
+User::instance()->deleteModelCache(['id' => $id]);
 
 // get or set cache
-User::instance()->getOrSetModelCacheByAttribute($key, function ($behavior) use ($key) {
-    $condition = $behavior->ensureActiveKeyAttribute($key);
+User::instance()->getOrSetModelCacheByAttribute($id, function ($behavior) use ($id) {
+    $condition = $behavior->ensureActiveKeyAttribute($id);
+    if (!$condition) {
+        $condition = $id;
+    }
     $model = User::findOne($condition);
     return $model ? $model->getActiveCacheValue() : false;
 }, $duration, $dependency);
 // OR
-$condition = ['keyAttribute' => $key];
+$condition = ['id' => $id];
 User::instance()->getOrSetModelCache($condition, function ($behavior) use ($condition) {
     $model = User::findOne($condition);
     return $model ? $model->getActiveCacheValue() : false;
 }, $duration, $dependency);
 
 // trait method: find and return ActiveRecord from cache or database
-User::findOrSetOneByAttribute($key, $duration, $dependency);
+User::findOrSetOneByAttribute($id, $duration, $dependency);
 
 
 // Using composite key attribute
-$key1 = 1; // `ActiveCacheBehavior::$keyAttributes` values
-$key2 = 2; // `ActiveCacheBehavior::$keyAttributes` values
-$keys = [$key1, $key2];
+// ActiveCacheBehavior::$keyAttributes = ['id1', 'id2']
+$id1 = 1;
+$id2 = 2;
+$ids = [$id1, $id2];
 
 // get cache
-User::instance()->getModelCacheByAttribute($keys);
+User::instance()->getModelCacheByAttribute($ids);
 // OR
-User::instance()->getModelCache(['keyAttribute1' => $key1, 'keyAttribute2' => $key2]);
+User::instance()->getModelCache(['id1' => $id1, 'id2' => $id2]);
 
 // exists cache
-User::instance()->existsModelCacheByAttribute($keys);
+User::instance()->existsModelCacheByAttribute($ids);
 // OR
-User::instance()->existsModelCache(['keyAttribute1' => $key1, 'keyAttribute2' => $key2]);
+User::instance()->existsModelCache(['id1' => $id1, 'id2' => $id2]);
 
 // set cache
-User::instance()->setModelCacheByAttribute($keys, $value, $duration, $dependency);
+User::instance()->setModelCacheByAttribute($ids, $value, $duration, $dependency);
 // OR
-User::instance()->setModelCache(['keyAttribute1' => $key1, 'keyAttribute2' => $key2], $value, $duration, $dependency);
+User::instance()->setModelCache(['id1' => $id1, 'id2' => $id2], $value, $duration, $dependency);
 
 // add cache
-User::instance()->addModelCacheByAttribute($keys, $value, $duration, $dependency);
+User::instance()->addModelCacheByAttribute($ids, $value, $duration, $dependency);
 // OR
-User::instance()->addModelCache(['keyAttribute1' => $key1, 'keyAttribute2' => $key2], $value, $duration, $dependency);
+User::instance()->addModelCache(['id1' => $id1, 'id2' => $id2], $value, $duration, $dependency);
 
 // delete cache
-User::instance()->deleteModelCacheByAttribute($keys);
+User::instance()->deleteModelCacheByAttribute($ids);
 // OR
-User::instance()->deleteModelCache(['keyAttribute1' => $key1, 'keyAttribute2' => $key2]);
+User::instance()->deleteModelCache(['id1' => $id1, 'id2' => $id2]);
 
 // get or set cache
-User::instance()->getOrSetModelCacheByAttribute($keys, function ($behavior) use ($keys) {
-    $condition = $behavior->ensureActiveKeyAttribute($keys);
+User::instance()->getOrSetModelCacheByAttribute($ids, function ($behavior) use ($ids) {
+    $condition = $behavior->ensureActiveKeyAttribute($ids);
+    if (!$condition) {
+        $condition = $ids;
+    }
     $model = User::findOne($condition);
     return $model ? $model->getActiveCacheValue() : false;
 }, $duration, $dependency);
 // OR
-$condition = ['keyAttribute1' => $key1, 'keyAttribute2' => $key2];
+$condition = ['id1' => $id1, 'id2' => $id2];
 User::instance()->getOrSetModelCache($condition, function ($behavior) use ($condition) {
     $model = User::findOne($condition);
     return $model ? $model->getActiveCacheValue() : false;
 }, $duration, $dependency);
 
 // trait method: find and return ActiveRecord from cache or database
-User::findOrSetOneByAttribute($keys, $duration, $dependency);
+User::findOrSetOneByAttribute($ids, $duration, $dependency);
 
 
 // Using database transactions, and the `commit()` time is too long
