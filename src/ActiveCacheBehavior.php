@@ -408,10 +408,8 @@ class ActiveCacheBehavior extends ModelCacheBehavior
      */
     public function afterInsert($event)
     {
-        // 调试日志。
-        Yii::debug("Delete cache after insert.", __METHOD__);
-        
         // 删除可能已存在与新增数据相关的缓存。
+        Yii::debug("Delete cache after insert.", __METHOD__);
         $this->deleteActiveCache();
     }
 
@@ -430,10 +428,8 @@ class ActiveCacheBehavior extends ModelCacheBehavior
      */
     public function afterDelete()
     {
-        // 调试日志。
-        Yii::debug("Delete cache after delete.", __METHOD__);
-        
         // 删除缓存。
+        Yii::debug("Delete cache after delete.", __METHOD__);
         $this->deleteModelCache($this->_oldCacheKey);
     }
     

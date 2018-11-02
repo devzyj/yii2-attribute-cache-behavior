@@ -137,10 +137,8 @@ class ModelCacheBehavior extends \yii\base\Behavior
         // 加工缓存键。
         $cacheKey = $this->processModelCacheKey($key);
         
-        // 调试日志。
-        Yii::debug($cacheKey, __METHOD__);
-        
         // 获取缓存内容。
+        Yii::debug($cacheKey, __METHOD__);
         return $this->cache->get($cacheKey);
     }
 
@@ -158,10 +156,8 @@ class ModelCacheBehavior extends \yii\base\Behavior
         // 加工缓存键。
         $cacheKey = $this->processModelCacheKey($key);
         
-        // 调试日志。
-        Yii::debug($cacheKey, __METHOD__);
-        
         // 获取缓存内容。
+        Yii::debug($cacheKey, __METHOD__);
         return $this->cache->exists($cacheKey);
     }
     
@@ -185,11 +181,9 @@ class ModelCacheBehavior extends \yii\base\Behavior
         // 加工缓存键。
         $cacheKey = $this->processModelCacheKey($key);
 
-        // 调试日志。
+        // 设置缓存内容。
         Yii::debug($cacheKey, __METHOD__);
         Yii::debug($value, __METHOD__);
-        
-        // 设置缓存内容。
         return $this->cache->set($cacheKey, $value, $duration, $dependency);
     }
     
@@ -210,11 +204,9 @@ class ModelCacheBehavior extends \yii\base\Behavior
         // 加工缓存键。
         $cacheKey = $this->processModelCacheKey($key);
 
-        // 调试日志。
+        // 设置缓存内容。
         Yii::debug($cacheKey, __METHOD__);
         Yii::debug($value, __METHOD__);
-        
-        // 设置缓存内容。
         return $this->cache->add($cacheKey, $value, $duration, $dependency);
     }
     
@@ -230,10 +222,8 @@ class ModelCacheBehavior extends \yii\base\Behavior
         // 加工缓存键。
         $cacheKey = $this->processModelCacheKey($key);
 
-        // 调试日志。
-        Yii::debug($cacheKey, __METHOD__);
-        
         // 删除缓存内容。
+        Yii::debug($cacheKey, __METHOD__);
         return $this->cache->delete($cacheKey);
     }
     

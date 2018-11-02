@@ -32,10 +32,8 @@ trait ActiveCacheBehaviorTrait
             /* @var $behavior \devzyj\behaviors\ActiveCacheBehavior */
             $condition = $behavior->ensureActiveKeyAttribute($attribute);
             
-            // debug log.
-            Yii::debug("Cache does not exist, querying the data from the database.", __METHOD__);
-
             /* @var $model \yii\db\ActiveRecord */
+            Yii::debug("Cache does not exist, querying the data from the database.", __METHOD__);
             $model = static::findOne($condition);
             return $model ? $model->getActiveCacheValue() : false;
         }, $duration, $dependency);
