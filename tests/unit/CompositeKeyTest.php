@@ -53,6 +53,9 @@ class CompositeKeyTest extends TestCase
         $this->assertEquals('get or set cache', TestCompositeKey::instance()->getOrSetModelCacheByAttribute($attribute, function () {
             return 'get or set cache again';
         }));
+        
+        // test associative array
+        $this->assertEquals('get or set cache', TestCompositeKey::instance()->getModelCacheByAttribute(['id1' => 1, 'id2' => 2]));
     }
     
     /**

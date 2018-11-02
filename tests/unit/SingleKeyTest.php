@@ -53,6 +53,9 @@ class SingleKeyTest extends TestCase
         $this->assertEquals('get or set cache', TestSingleKey::instance()->getOrSetModelCacheByAttribute($attribute, function () {
             return 'get or set cache again';
         }));
+        
+        // test associative array
+        $this->assertEquals('get or set cache', TestSingleKey::instance()->getModelCacheByAttribute(['id' => $attribute]));
     }
     
     /**

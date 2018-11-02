@@ -170,8 +170,8 @@ use yii\helpers\ArrayHelper;
  * }
  * ```
  * 
- * @property array $keyAttributes 缓存键属性。如果没有设置，则使用 [[$owner::primaryKey()]]。
- * @property array $valueAttributes 缓存值属性。如果没有设置，则使用 [[$owner::attributes()]]。
+ * @property string[] $keyAttributes 缓存键属性。如果没有设置，则使用 [[$owner::primaryKey()]]。
+ * @property string[] $valueAttributes 缓存值属性。如果没有设置，则使用 [[$owner::attributes()]]。
  * @property array $activeCacheKey 缓存键属性值列表。
  * @property array $activeCacheValue 缓存值属性值列表。
  * 
@@ -186,12 +186,12 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     public $owner;
 
     /**
-     * @var array 缓存键属性。
+     * @var string[] 缓存键属性。
      */
     private $_keyAttributes;
 
     /**
-     * @var array 缓存值属性。
+     * @var string[] 缓存值属性。
      */
     private $_valueAttributes;
     
@@ -204,7 +204,7 @@ class ActiveCacheBehavior extends ModelCacheBehavior
      * 获取缓存键属性。
      * 
      * @throws \yii\base\InvalidConfigException
-     * @return array
+     * @return string[]
      */
     public function getKeyAttributes()
     {
@@ -223,7 +223,7 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     /**
      * 设置缓存键属性。
      * 
-     * @param string|array $value
+     * @param string|string[] $value
      */
     public function setKeyAttributes($value)
     {
@@ -234,7 +234,7 @@ class ActiveCacheBehavior extends ModelCacheBehavior
      * 获取缓存值属性。
      *
      * @throws \yii\base\InvalidConfigException
-     * @return array
+     * @return string[]
      */
     public function getValueAttributes()
     {
@@ -250,7 +250,7 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     /**
      * 设置缓存值属性。
      *
-     * @param array $value
+     * @param string[] $value
      */
     public function setValueAttributes($value)
     {
@@ -475,8 +475,9 @@ class ActiveCacheBehavior extends ModelCacheBehavior
      */
     protected function validateChangedKeyAttributes($changedAttributes)
     {
+        $keyAttributes = $this->getKeyAttributes();
         foreach ($changedAttributes as $attribute => $value) {
-            if (in_array($attribute, $this->getKeyAttributes())) {
+            if (in_array($attribute, $keyAttributes)) {
                 return true;
             }
         }
@@ -492,8 +493,9 @@ class ActiveCacheBehavior extends ModelCacheBehavior
      */
     protected function validateChangedValueAttributes($changedAttributes)
     {
+        $valueAttributes = $this->getValueAttributes();
         foreach ($changedAttributes as $attribute => $value) {
-            if (in_array($attribute, $this->getValueAttributes())) {
+            if (in_array($attribute, $valueAttributes)) {
                 return true;
             }
         }
@@ -527,7 +529,7 @@ class ActiveCacheBehavior extends ModelCacheBehavior
             }
             
             // 验证关联数组的有效性。
-            if (array_diff_key($keyAttributes, $attribute)) {
+            if (array_diff($keyAttributes, array_keys($attribute))) {
                 // 关联数组中的属性名称与设置的缓存键属性不同。
                 throw new InvalidArgumentException('The key of `$attribute` and `$keyAttributes` are not equal.');
             }
