@@ -102,9 +102,6 @@ use yii\helpers\ArrayHelper;
  * // get or set cache
  * User::instance()->getOrSetModelCacheByAttribute($id, function ($behavior) use ($id) {
  *     $condition = $behavior->ensureActiveKeyAttribute($id);
- *     if (!$condition) {
- *         $condition = $id;
- *     }
  *     $model = User::findOne($condition);
  *     return $model ? $model->getActiveCacheValue() : false;
  * }, $duration, $dependency);
@@ -153,9 +150,6 @@ use yii\helpers\ArrayHelper;
  * // get or set cache
  * User::instance()->getOrSetModelCacheByAttribute($ids, function ($behavior) use ($ids) {
  *     $condition = $behavior->ensureActiveKeyAttribute($ids);
- *     if (!$condition) {
- *         $condition = $ids;
- *     }
  *     $model = User::findOne($condition);
  *     return $model ? $model->getActiveCacheValue() : false;
  * }, $duration, $dependency);
@@ -650,11 +644,11 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     /**
      * 通过属性值，获取或者设置缓存。
      * 
-     * @param mixed $attribute 属性值。参考 [[ensureActiveKeyAttribute()]]，如果属性值不正确，则会跳过缓存的操作，直接返回 `$callable` 执行的结果。
+     * @param mixed $attribute 属性值。参考 [[ensureActiveKeyAttribute()]]。
      * @param callable|\Closure $callable 回调方法。
      * @param integer $duration 缓存的持续时间（秒）。
      * @param \yii\caching\Dependency $dependency 缓存的依赖项。
-     * @return mixed 返回 `$callable` 执行的结果。
+     * @return mixed 属性值不正确时返回 `false`，否则返回 `$callable` 执行的结果。
      * @see ensureActiveKeyAttribute()
      * @see ModelCacheBehavior::getOrSetModelCache()
      */
@@ -662,7 +656,7 @@ class ActiveCacheBehavior extends ModelCacheBehavior
     {
         $key = $this->ensureActiveKeyAttribute($attribute);
         if ($key === false) {
-            return call_user_func($callable, $this);
+            return false;
         }
         
         return $this->getOrSetModelCache($key, $callable, $duration, $dependency);
