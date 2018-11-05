@@ -111,9 +111,6 @@ User::instance()->deleteModelCache(['id' => $id]);
 // get or set cache
 User::instance()->getOrSetModelCacheByAttribute($id, function ($behavior) use ($id) {
     $condition = $behavior->ensureActiveKeyAttribute($id);
-    if (!$condition) {
-        $condition = $id;
-    }
     $model = User::findOne($condition);
     return $model ? $model->getActiveCacheValue() : false;
 }, $duration, $dependency);
@@ -162,9 +159,6 @@ User::instance()->deleteModelCache(['id1' => $id1, 'id2' => $id2]);
 // get or set cache
 User::instance()->getOrSetModelCacheByAttribute($ids, function ($behavior) use ($ids) {
     $condition = $behavior->ensureActiveKeyAttribute($ids);
-    if (!$condition) {
-        $condition = $ids;
-    }
     $model = User::findOne($condition);
     return $model ? $model->getActiveCacheValue() : false;
 }, $duration, $dependency);
