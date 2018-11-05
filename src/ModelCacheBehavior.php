@@ -65,7 +65,7 @@ use yii\helpers\Json;
 class ModelCacheBehavior extends \yii\base\Behavior
 {
     /**
-     * @var \yii\caching\CacheInterface|string 缓存组件。如果没有设置，则使用 [[Yii::$app->getModelCache()]]。
+     * @var \yii\caching\CacheInterface|string 缓存组件。如果没有设置，则使用 [[Yii::$app->getCache()]]。
      */
     public $cache;
     
