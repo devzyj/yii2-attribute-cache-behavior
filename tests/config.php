@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'id' => 'devzyj/yii2-cache-behavior',
+    'id' => 'devzyj/yii2-attribute-cache-behavior',
     'class' => yii\console\Application::className(),
     'language' => 'en-US',
     'basePath' => Yii::getAlias('@tests'),
