@@ -1,7 +1,7 @@
 {
     "name": "devzyj/yii2-attribute-cache-behavior",
     "description": "The ActiveRecord attribute cache behavior for Yii2.",
-    "keywords": ["yii2", "attribute", "cache", "behavior", "activerecord"],
+    "keywords": ["yii2", "extension", "attribute", "cache", "behavior", "activerecord"],
     "type": "yii2-extension",
     "license": "BSD-3-Clause",
     "authors": [
